@@ -11,7 +11,11 @@ import { borrowRoutes } from './app/route/borrow.route';
 
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'live-deploy-url']
+   })
+);
 app.use(express.json());
 
 connectDB();
