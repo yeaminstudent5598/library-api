@@ -57,7 +57,7 @@ export const getBorrowedSummary = async (_req: Request, res: Response): Promise<
             isbn: '$bookInfo.isbn'
           },
           totalQuantity: 1
-        }
+        } 
       }
     ]);
 
