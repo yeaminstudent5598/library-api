@@ -1,145 +1,153 @@
-# 📚 Library Management API
+# 📚 Library Management API with Express, TypeScript & MongoDB
 
-A RESTful API built with **Express.js**, **TypeScript**, and **MongoDB** to manage books and borrow records efficiently.
-
----
-
-## 🚀 Features
-
-- 📖 Create, Read, Update, Delete (CRUD) for books
-- 🔍 Filtering & Sorting (by genre, creation date)
-- 📦 Borrow book with quantity check & update
-- 📊 Borrow summary using MongoDB Aggregation
-- ✅ Validation with Mongoose Schema
-- ⚙️ Static methods & Middleware
-
----
-
-## 📁 Folder Structure
-
-```
-src/
-├── app/
-│   ├── config/
-│   │   └── db.ts
-│   ├── controllers/
-│   │   ├── book.controller.ts
-│   │   └── borrow.controller.ts
-│   ├── models/
-│   │   ├── book.model.ts
-│   │   └── borrow.model.ts
-│   └── route/
-│       ├── book.route.ts
-│       └── borrow.route.ts
-├── index.ts
-├── server.ts
-.env
-.gitignore
-package.json
-tsconfig.json
-README.md
-```
+A simple Express + MongoDB backend for managing library books and borrow records.
 
 ---
 
 ## 📦 Tech Stack
 
-- **Framework:** Express.js  
-- **Language:** TypeScript  
-- **Database:** MongoDB with Mongoose  
-- **Validation:** Mongoose Schema + Custom Middleware  
-- **Tooling:** ts-node-dev, dotenv
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- TypeScript
+- Vercel (deployment)
 
 ---
+## 🧠 Features
 
-## 🔧 Getting Started
+🔸 Custom validation using Mongoose schema rules
 
-### 1️⃣ Clone & Navigate
+🔸 Automatically mark a book as unavailable if copies reach zero
 
-```bash
-git clone https://github.com/yourusername/library-api.git
-cd library-api
+🔸 Aggregation pipeline to get borrowed book stats (title, ISBN, total quantity)
+
+🔸 Middleware to clean up borrows when a book is deleted (findOneAndDelete)
+
+_ _ _
+
+## 📁 Folder Structure
+
+```text
+src/
+│
+├── app/
+│   ├── app.ts                    # Express app setup
+│   └── server.ts                 # Server entry point
+│
+├── controller/
+│   ├── book_controller.ts        # Book API endpoints
+│   └── borrow_controller.ts      # Borrow API endpoints
+│
+├── model/
+│   ├── book_model.ts             # Book schema and pre middleware
+│   └── borrow_model.ts           # Borrow schema and instance method
+│
+├── interface/
+│   ├── book_interface.ts
+│   └── borrow_interface.ts
 ```
+## 🗂️ Models
 
-### 2️⃣ Install Dependencies
-
-```bash
-npm install
-```
-
-### 3️⃣ Create `.env` File
-
-```env
-PORT=5000
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/library
-```
-
-> ⚠️ `.env` is already listed in `.gitignore`
-
-### 4️⃣ Run Development Server
-
-```bash
-npm run dev
-```
+This project uses **Mongoose** to define two main data models: **Book** and **Borrow**. They represent the core of the library management system.
 
 ---
 
-## 📮 API Endpoints
+### 📚 Book Model (`book_model.ts`)
 
-### ✅ Books
+The **Book** model stores details about each book in the library, including:
 
-| Method | Endpoint             | Description                  |
-|--------|----------------------|------------------------------|
-| POST   | `/api/books`         | Create a new book            |
-| GET    | `/api/books`         | Get all books (filterable)   |
-| GET    | `/api/books/:bookId` | Get a single book by ID      |
-| PUT    | `/api/books/:bookId` | Update book info             |
-| DELETE | `/api/books/:bookId` | Delete a book                |
+- `title`: The book’s title (required).
+- `author`: The author’s name (required).
+- `genre`: Book genre, restricted to specific categories (e.g., FICTION, SCIENCE).
+- `isbn`: Unique ISBN number (required and unique).
+- `description`: Optional description text.
+- `copies`: Number of copies available (must be zero or more).
+- `available`: Boolean to mark if the book is currently available (default: true).
 
-### ✅ Borrow
-
-| Method | Endpoint       | Description                            |
-|--------|----------------|----------------------------------------|
-| POST   | `/api/borrow`  | Borrow a book (with quantity update)   |
-| GET    | `/api/borrow`  | Get borrow summary using aggregation   |
+**Special Behavior:**  
+When a **book is deleted**, a Mongoose pre-delete hook automatically deletes all borrow records referencing that book to maintain data integrity.
 
 ---
 
-## 📊 Aggregated Borrow Summary Example
+### 🔖 Borrow Model (`borrow_model.ts`)
 
-```json
-{
-  "success": true,
-  "message": "Borrowed books summary retrieved successfully",
-  "data": [
-    {
-      "book": {
-        "title": "The Theory of Everything",
-        "isbn": "9780553380163"
-      },
-      "totalQuantity": 5
-    }
-  ]
-}
-```
+The **Borrow** model tracks the borrowing records of books:
+
+- `book`: Reference to a Book document (required).
+- `quantity`: Number of copies borrowed (minimum 1, required).
+- `dueDate`: Date by which the book should be returned (required).
+
+**Instance Methods:**
+
+- `updateAvailableBook(bookId)`: Marks the referenced book as unavailable (sets `available` to false).
 
 ---
 
-## 📽️ Video Explanation
+### Relationships
 
-👉 [Click here to watch the video explanation](https://your-video-link.com)
-
----
-
-## 🧑‍💻 Author
-
-- **Name:** Yeamin Madbor  
-- **Email:** yeaminstudent5598@gmail.com  
-- **GitHub:** [@yeaminstudent5598](https://github.com/yeaminstudent5598)
+- **Borrow documents** reference **Book documents** by their ObjectId.
+- Deleting a **Book** triggers removal of all associated **Borrow** records to maintain data integrity.
 
 ---
 
-## 📄 License
 
-This project is open-source under the [MIT License](LICENSE).
+## 🚀 Setup Instructions
+## 🛠️ Local Setup (Quick Start)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Rdm-jony/level2_assignment_3.git
+   cd level2_assignment_3
+   
+2. **Install dependencies**
+   ```bash
+   npm install
+
+3. **Add your MongoDB credentials in the .env file:**
+    ```bash
+    DB_USER=your_username
+    DB_PASS=your_password
+    
+4. **Start the development server**
+    ```bash
+    npm run dev
+
+
+### 🌐 Live Demo:
+🔗 https://librarybeckend.vercel.app/
+
+_ _ _
+## 📘 API Endpoints
+
+### 🔹 Books
+
+| Method | Endpoint         | Description                           |
+| ------ | ---------------- | ------------------------------------- |
+| GET    | `/books`         | Get all books (with optional filters) |
+| GET    | `/books/:bookId` | Get a specific book                   |
+| POST   | `/books`         | Create a new book                     |
+| PUT    | `/books/:bookId` | Update a book                         |
+| DELETE | `/books/:bookId` | Delete a book                         |
+
+### ✅ Optional Query Parameters (GET /books)
+
+filter — filter by genre
+
+sortBy — sort field (e.g., title)
+
+sort — asc or desc
+
+limit — number of results (default: 4)
+
+### 🔹 Borrow Records
+
+| Method | Endpoint   | Description                   |
+| ------ | ---------- | ----------------------------- |
+| POST   | `/borrows` | Borrow a book                 |
+| GET    | `/borrows` | Get summary of borrowed books |
+
+_ _ _
+
+
+
 
